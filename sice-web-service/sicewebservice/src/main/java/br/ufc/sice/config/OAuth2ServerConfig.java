@@ -58,28 +58,28 @@ public class OAuth2ServerConfig {
 				.authorizeRequests()
 //					.antMatchers("/me").access("#oauth2.hasScope('read')")
 				//user
-					.antMatchers("/user/insert").access("#oauth2.hasScope('read') or (!#oauth2.isOAuth() and hasRole('ROLE_USER'))")
-					.antMatchers("/user/load").access("#oauth2.hasScope('read') or (!#oauth2.isOAuth() and hasRole('ROLE_USER'))")
+					.antMatchers("/user/insert").access("#oauth2.hasScope('trust') or (!#oauth2.isOAuth() and hasRole('ADMIN'))")
+					.antMatchers("/user/load").access("#oauth2.hasScope('read') and (!#oauth2.isOAuth() and (hasRole('ADMIN') or hasRole('USER')))")
 				//event
-					.antMatchers("/event/insert").access("#oauth2.hasScope('trust')")
-					.antMatchers("/event/insertweb").access("#oauth2.hasScope('trust')")
-					.antMatchers("/event/load").access("#oauth2.hasScope('trust')")
-					.antMatchers("/event/load_filter").access("#oauth2.hasScope('trust')")
-					.antMatchers("/event/summary").access("#oauth2.hasScope('trust')")
+					.antMatchers("/event/insert").access("#oauth2.hasScope('trust') or (!#oauth2.isOAuth() and hasRole('ADMIN'))")
+					.antMatchers("/event/insertweb").access("#oauth2.hasScope('trust') or (!#oauth2.isOAuth() and hasRole('ADMIN'))")
+					.antMatchers("/event/load").access("#oauth2.hasScope('read') and (!#oauth2.isOAuth() and (hasRole('ADMIN') or hasRole('USER')))")
+					.antMatchers("/event/load_filter").access("#oauth2.hasScope('read') and (!#oauth2.isOAuth() and (hasRole('ADMIN') or hasRole('USER')))")
+					.antMatchers("/event/summary").access("#oauth2.hasScope('read') and (!#oauth2.isOAuth() and (hasRole('ADMIN') or hasRole('USER')))")
 				//participation
-					.antMatchers("/participation/insert").access("#oauth2.hasScope('trust')")
+					.antMatchers("/participation/insert").access("#oauth2.hasScope('trust') or (!#oauth2.isOAuth() and hasRole('ADMIN'))")
 				//subevent
-					.antMatchers("/subevent/insert").access("#oauth2.hasScope('trust')")
-					.antMatchers("/subevent/insertweb").access("#oauth2.hasScope('trust')")
-					.antMatchers("/subevent/load").access("#oauth2.hasScope('trust')")
-					.antMatchers("/subevent/get_participante").access("#oauth2.hasScope('trust')")
-//					.antMatchers("/photos/**").access("#oauth2.hasScope('read') or (!#oauth2.isOAuth() and hasRole('ROLE_USER'))")
+					.antMatchers("/subevent/insert").access("#oauth2.hasScope('trust') or (!#oauth2.isOAuth() and hasRole('ADMIN'))")
+					.antMatchers("/subevent/insertweb").access("#oauth2.hasScope('trust') or (!#oauth2.isOAuth() and hasRole('ADMIN'))")
+					.antMatchers("/subevent/load").access("#oauth2.hasScope('read') and (!#oauth2.isOAuth() and (hasRole('ADMIN') or hasRole('USER')))")
+					.antMatchers("/subevent/get_participante").access("#oauth2.hasScope('trust') or (!#oauth2.isOAuth() and hasRole('ADMIN'))")
+				//regex
 					.regexMatchers(HttpMethod.DELETE, "/oauth/users/([^/].*?)/tokens/.*")
-						.access("#oauth2.clientHasRole('ROLE_CLIENT') and (hasRole('ROLE_USER') or #oauth2.isClient()) and #oauth2.hasScope('write')")
+						.access("#oauth2.clientHasRole('ADMIN') and (hasRole('USER') or #oauth2.isClient()) and #oauth2.hasScope('write')")
 					.regexMatchers(HttpMethod.GET, "/oauth/clients/([^/].*?)/users/.*")
-						.access("#oauth2.clientHasRole('ROLE_CLIENT') and (hasRole('ROLE_USER') or #oauth2.isClient()) and #oauth2.hasScope('read')")
+						.access("#oauth2.clientHasRole('ADMIN') and (hasRole('USER') or #oauth2.isClient()) and #oauth2.hasScope('read')")
 					.regexMatchers(HttpMethod.GET, "/oauth/clients/.*")
-						.access("#oauth2.clientHasRole('ROLE_CLIENT') and #oauth2.isClient() and #oauth2.hasScope('read')");
+						.access("#oauth2.clientHasRole('ADMIN') and #oauth2.isClient() and #oauth2.hasScope('read')");
 			// @formatter:on
 		}
 
@@ -105,14 +105,14 @@ public class OAuth2ServerConfig {
 			// @formatter:off
 			clients.inMemory()
 			        .withClient("my-trusted-client-with-secret")
-			            .authorizedGrantTypes("password", "authorization_code", "refresh_token", "implicit")
+			            .authorizedGrantTypes("password", /*"authorization_code",*/ "refresh_token", "implicit")
 			            .authorities("ADMIN")
-			            .scopes("read", "write", "trust")
+			            .scopes(/*"read", "write", */"trust")
 			            .secret("sicesecret")
 			           .accessTokenValiditySeconds(3000000)
 			        .and()
 		            .withClient("my-less-trusted-client")
-			            .authorizedGrantTypes("authorization_code", "implicit", "refresh_token")
+			            .authorizedGrantTypes(/*"password", "authorization_code",*/ "implicit"/*, "refresh_token"*/)
 			            .authorities("USER")
 			            .scopes("read");
 //					.withClient("sice")
